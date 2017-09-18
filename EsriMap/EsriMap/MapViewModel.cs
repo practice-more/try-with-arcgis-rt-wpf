@@ -13,6 +13,9 @@ using Esri.ArcGISRuntime.Security;
 using Esri.ArcGISRuntime.Symbology;
 using Esri.ArcGISRuntime.Tasks;
 using Esri.ArcGISRuntime.UI;
+using Esri.ArcGISRuntime.UI.Controls;
+using System.Windows;
+using System.Windows.Media;
 
 namespace EsriMap
 {
@@ -23,24 +26,8 @@ namespace EsriMap
     {
         public MapViewModel()
         {
-
         }
 
-        private Map _map = new Map(Basemap.CreateStreets());
-
-        /// <summary>
-        /// Gets or sets the map
-        /// </summary>
-        public Map Map
-        {
-            get { return _map; }
-            set { _map = value; OnPropertyChanged(); }
-        }
-
-        /// <summary>
-        /// Raises the <see cref="MapViewModel.PropertyChanged" /> event
-        /// </summary>
-        /// <param name="propertyName">The name of the property that has changed</param>
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             var propertyChangedHandler = PropertyChanged;
