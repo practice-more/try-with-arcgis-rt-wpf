@@ -19,6 +19,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Controls.Primitives;
 
 namespace EsriMap
 {
@@ -37,9 +38,11 @@ namespace EsriMap
         // Map initialization logic is contained in MapViewModel.cs
         // Create and hold reference to the feature layer
         private FeatureLayer _featureLayer;
+        FeatureQueryResult _queryResult;
 
         private async void Initialize()
         {
+            myPopup.Width = myPopup.Height = 0;
             // Create new Map with basemap
             var myMap = new Map(Basemap.CreateTopographic());
 
@@ -106,7 +109,38 @@ namespace EsriMap
                 queryParams.Geometry = selectionEnvelope;
 
                 // Select the features based on query parameters defined above
-                await _featureLayer.SelectFeaturesAsync(queryParams, Esri.ArcGISRuntime.Mapping.SelectionMode.New);
+                 _queryResult = await _featureLayer.SelectFeaturesAsync(queryParams, Esri.ArcGISRuntime.Mapping.SelectionMode.New);
+                bool hasResult = false;
+                foreach(var r in _queryResult)
+                {
+                    hasResult = true;
+                    Feature f = r as Feature;
+                    string attribute = "";
+                    foreach(var a in f.Attributes)
+                    {
+                        attribute = attribute + a.ToString() + "\n";
+                    }
+
+                    MapPoint p = f.Geometry as MapPoint;
+
+                    Point sp = MyMapView.LocationToScreen(p);
+                    TextBlock popupText = new TextBlock();
+                    popupText.Background = Brushes.LightBlue;
+                    popupText.Foreground = Brushes.Blue;
+                    popupText.Text = attribute;
+                    myPopup.Child = popupText;
+                    myPopup.Width = 200;
+                    myPopup.Height = 100;
+                    var b = MyMapView.Margin;
+                    
+                    myPopup.Margin = new Thickness(sp.X, sp.Y, MyMapView.ActualWidth - 200 - sp.X, MyMapView.ActualHeight - 100 - sp.Y);
+                }
+
+                if(!hasResult)
+                {
+                    myPopup.Width = myPopup.Height = 0;
+                }
+
             }
             catch (Exception ex)
             {

@@ -12,5 +12,17 @@
     </Window.Resources>
     <Grid>
         <esri:MapView x:Name="MyMapView" />
+        <Border Name="myPopup" Width="200"
+                              Height="100"
+                              Margin="0,0,100,200">
+            <!--<Path x:Name="myPopupPath">
+                <Path.Data>
+                    <PathGeometry x:Name="myPopupPathGeometry" Figures="{Binding FiguresPopupPathGeometry}"/>
+                </Path.Data>
+            </Path>-->
+            <TextBlock Background="White" Foreground="Blue">Test</TextBlock>
+        </Border>
     </Grid>
+
+
 </Window>
