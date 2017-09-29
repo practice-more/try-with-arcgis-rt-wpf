@@ -85,7 +85,61 @@ namespace EsriMap
 
                 // Add tap event handler for mapview
                 MyMapView.GeoViewTapped += OnMapViewTapped;
+
+                ShowLabel();
             }
+        }
+
+        private void ShowLabel()
+        {
+            //{
+            //  "labelExpressionInfo": 
+            //  {
+            //                    "expression": "return $feature.address;"
+            //  },
+            //  "labelPlacement": "esriServerPolygonPlacementAlwaysHorizontal",
+            //  "symbol": 
+            //  {
+            //                    "color": [255,0,255,123],
+            //    "font": { "size": 16 },
+            //    "type": "esriTS"
+            //  }
+            //}
+            //https://developers.arcgis.com/net/latest/wpf/guide/add-labels.htm
+            // Create a StringBuilder to create the label definition JSON string
+            StringBuilder addressLabelsBuilder = new StringBuilder();
+            addressLabelsBuilder.AppendLine("{");
+            //     Define a labeling expression that will show the address attribute value
+            addressLabelsBuilder.AppendLine("\"labelExpressionInfo\": {");
+            addressLabelsBuilder.AppendLine("\"expression\": \"return 'id:' + $feature.objectid;\"},");
+            //     Align labels horizontally
+            addressLabelsBuilder.AppendLine("\"labelPlacement\": \"esriServerPolygonPlacementAlwaysHorizontal\",");
+            //     Use a green bold text symbol
+            addressLabelsBuilder.AppendLine("\"symbol\": {");
+            addressLabelsBuilder.AppendLine("\"color\": [255,0,0,255],");
+            addressLabelsBuilder.AppendLine("\"font\": {\"size\": 18, \"weight\": \"bold\"},");
+            addressLabelsBuilder.AppendLine("\"type\": \"esriTS\"}");
+            addressLabelsBuilder.AppendLine("}");
+
+
+            // Get the label definition string
+            var addressLabelsJson = addressLabelsBuilder.ToString();
+
+
+            // Create a new LabelDefintion object using the static FromJson method
+            LabelDefinition labelDef = LabelDefinition.FromJson(addressLabelsJson);
+
+
+            // Clear the current collection of label definitions (if any)
+            _featureLayer.LabelDefinitions.Clear();
+
+
+            // Add this label definition to the collection
+            _featureLayer.LabelDefinitions.Add(labelDef);
+
+
+            // Make sure labeling is enabled for the layer
+            _featureLayer.LabelsEnabled = true;
         }
 
         private async void OnMapViewTapped(object sender, GeoViewInputEventArgs e)
