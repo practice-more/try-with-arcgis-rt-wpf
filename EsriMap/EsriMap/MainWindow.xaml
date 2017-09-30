@@ -11,18 +11,92 @@
         <local:MapViewModel x:Key="MapViewModel" />
     </Window.Resources>
     <Grid>
-        <esri:MapView x:Name="MyMapView" />
-        <Border Name="myPopup" Width="200"
-                              Height="100"
-                              Margin="0,0,100,200">
-            <!--<Path x:Name="myPopupPath">
-                <Path.Data>
-                    <PathGeometry x:Name="myPopupPathGeometry" Figures="{Binding FiguresPopupPathGeometry}"/>
-                </Path.Data>
-            </Path>-->
-            <TextBlock Background="White" Foreground="Blue">Test</TextBlock>
-        </Border>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <esri:MapView x:Name="MyMapView" 
+                      Grid.Column="1"/>
+        <Grid Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="20"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition Height="35"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="1" Grid.Column="0" 
+                       HorizontalAlignment="Right" VerticalAlignment="Center"
+                       Text="Sketch shape:"/>
+            <ComboBox x:Name="SketchModeComboBox"
+                      Grid.Row="1" Grid.Column="1"
+                      HorizontalAlignment="Stretch" VerticalAlignment="Center"
+                      Margin="5"/>
+            <Button Grid.Row="2" Grid.Column="1"
+                    Content="Draw"
+                    Margin="5"
+                    Width="100" Height="25"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Click="DrawButtonClick"/>
+            <Button x:Name="EditButton" 
+                    Grid.Row="3" Grid.Column="1"
+                    Content="Edit"
+                    Margin="5"
+                    Width="100" Height="25"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    IsEnabled="False"
+                    Click="EditButtonClick"/>
+            <Button x:Name="DeleteButton" 
+                    Grid.Row="4" Grid.Column="1"
+                    Content="Delete"
+                    Margin="25,0"
+                    Width="100" Height="25"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    IsEnabled="True"
+                    Command="{Binding DeleteCommand}" Grid.RowSpan="2"/>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center" VerticalAlignment="Top"
+                        Grid.Row="5" Grid.Column="1" Margin="16,5,14,0" Grid.RowSpan="2">
+                <Button Content="Undo"
+                        Margin="5"
+                        Width="50" Height="25"
+                        Command="{Binding UndoCommand}"/>
+                <Button Content="Redo"
+                        Margin="5"
+                        Width="50" Height="25"
+                        Command="{Binding RedoCommand}"/>
+            </StackPanel>
+            <Button Grid.Row="6" Grid.Column="1"
+                    Content="Complete"
+                    Margin="5"
+                    Width="100" Height="25"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Command="{Binding CompleteCommand}"/>
+            <Button Grid.Row="8" Grid.Column="1"
+                    Content="Cancel"
+                    Margin="5"
+                    Width="100" Height="25"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Command="{Binding CancelCommand}"/>
+            <Button x:Name="ClearButton" 
+                    Grid.Row="9" Grid.Column="1"
+                    Content="Clear"
+                    Margin="5"
+                    Width="100" Height="25"
+                    IsEnabled="False"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    Click="ClearButtonClick"/>
+        </Grid>
     </Grid>
-
 
 </Window>
