@@ -22,6 +22,8 @@ using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
 using Esri.ArcGISRuntime.Http;
 using System.Collections.ObjectModel;
+using Esri.ArcGISRuntime.Security;
+using Esri.ArcGISRuntime.Portal;
 
 namespace EsriMap
 {
@@ -47,19 +49,82 @@ namespace EsriMap
         // after that, there will be no "only for develop" in the app
         private string _licenseKey = "runtimelite,1000,your license key";
 
-        private void InitializeRuntimeEnvironment()
+        private void LicenseWithLicenseKey(string key)
         {
             try
             {
-                Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.SetLicense(_licenseKey);
+                Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.SetLicense(key);
             }
-            catch (Exception ex)
+            catch 
             {
+                throw;
             }
+        }
 
-            // Add product infomation header 
+        // Indicate the url (portal) to authenticate with (ArcGIS Online)
+        static private Uri ServiceUri = new Uri("http://www.arcgis.com/sharing/rest");
+
+        public class MyChallengeHandler : IChallengeHandler
+        {
+            public Task<Credential> CreateCredentialAsync(CredentialRequestInfo requestInfo)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private async Task LicenseWithNamedUserAccountAsync()
+        {
+            // Challenge the user for portal credentials (OAuth credential request for arcgis.com)
+            CredentialRequestInfo loginInfo = new CredentialRequestInfo
+            {
+
+                // Use the OAuth implicit grant flow
+                GenerateTokenOptions = new GenerateTokenOptions
+                {
+                    TokenAuthenticationType = TokenAuthenticationType.OAuthImplicit
+                },
+
+                ServiceUri = ServiceUri
+
+            };
+
             try
             {
+                Esri.ArcGISRuntime.Security.AuthenticationManager.Current.ChallengeHandler = new MyChallengeHandler();
+
+                // Call GetCredentialAsync on the AuthenticationManager to invoke the challenge handler
+                Credential cred = await AuthenticationManager.Current.GetCredentialAsync(loginInfo, false);
+
+                // Connect to the portal (ArcGIS Online) using the credential
+                ArcGISPortal arcgisPortal = await ArcGISPortal.CreateAsync(loginInfo.ServiceUri, cred);
+
+                // Get LicenseInfo from the portal
+                Esri.ArcGISRuntime.LicenseInfo licenseInfo = arcgisPortal.PortalInfo.LicenseInfo;
+
+                // ... code here to license the app immediately and/or save the license (JSON string) to take the app offline ...
+                // License the app using the license info
+                Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.SetLicense(licenseInfo);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+
+        private void InitializeRuntimeEnvironment()
+        {
+            
+            try
+            {
+                // License with license key
+                LicenseWithLicenseKey(_licenseKey);
+
+
+                // License With Named User Account
+                LicenseWithNamedUserAccountAsync();
+
+                // Add product infomation header 
                 System.Net.Http.Headers.ProductInfoHeaderValue infoHeader = new System.Net.Http.Headers.ProductInfoHeaderValue("MyProductName", "version");
                 if (null == ArcGISHttpClientHandler.CustomUserAgentValues)
                 {
@@ -69,6 +134,7 @@ namespace EsriMap
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
             }
         }
 
