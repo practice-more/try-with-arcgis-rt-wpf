@@ -20,6 +20,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
+using Esri.ArcGISRuntime.Http;
+using System.Collections.ObjectModel;
 
 namespace EsriMap
 {
@@ -35,13 +37,45 @@ namespace EsriMap
             Initialize();
         }
 
+
         // Map initialization logic is contained in MapViewModel.cs
         // Create and hold reference to the feature layer
         private FeatureLayer _featureLayer;
         FeatureQueryResult _queryResult;
 
+        // for license your app
+        // after that, there will be no "only for develop" in the app
+        private string _licenseKey = "runtimelite,1000,your license key";
+
+        private void InitializeRuntimeEnvironment()
+        {
+            try
+            {
+                Esri.ArcGISRuntime.ArcGISRuntimeEnvironment.SetLicense(_licenseKey);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            // Add product infomation header 
+            try
+            {
+                System.Net.Http.Headers.ProductInfoHeaderValue infoHeader = new System.Net.Http.Headers.ProductInfoHeaderValue("MyProductName", "version");
+                if (null == ArcGISHttpClientHandler.CustomUserAgentValues)
+                {
+                    ArcGISHttpClientHandler.CustomUserAgentValues = new ObservableCollection<System.Net.Http.Headers.ProductInfoHeaderValue>();
+                }
+                ArcGISHttpClientHandler.CustomUserAgentValues.Add(infoHeader);
+            }
+            catch (Exception ex)
+            {
+            }
+        }
+
+
         private async void Initialize()
         {
+            InitializeRuntimeEnvironment();
             myPopup.Width = myPopup.Height = 0;
             // Create new Map with basemap
             var myMap = new Map(Basemap.CreateTopographic());
