@@ -122,7 +122,7 @@ namespace EsriMap
 
 
                 // License With Named User Account
-                LicenseWithNamedUserAccountAsync();
+                //LicenseWithNamedUserAccountAsync();
 
                 // Add product infomation header 
                 System.Net.Http.Headers.ProductInfoHeaderValue infoHeader = new System.Net.Http.Headers.ProductInfoHeaderValue("MyProductName", "version");
