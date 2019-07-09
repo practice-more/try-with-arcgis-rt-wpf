@@ -20,6 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Controls.Primitives;
+using Esri.ArcGISRuntime.Portal;
 
 namespace EsriMap
 {
@@ -40,112 +41,33 @@ namespace EsriMap
         private FeatureLayer _featureLayer;
         FeatureQueryResult _queryResult;
 
-        private async void Initialize()
-        {
-            myPopup.Width = myPopup.Height = 0;
-            // Create new Map with basemap
-            var myMap = new Map(Basemap.CreateTopographic());
+        private const string ItemId = "c6f90b19164c4283884361005faea852";
 
-            // Create envelope to be used as a target extent for map's initial viewpoint
-            Envelope myEnvelope = new Envelope(
-                -1131596.019761, 3893114.069099, 3926705.982140, 7977912.461790,
-                SpatialReferences.WebMercator);
-
-            // Set the initial viewpoint for map
-            myMap.InitialViewpoint = new Viewpoint(myEnvelope);
-
-            // Provide used Map to the MapView
-            MyMapView.Map = myMap;
-
-            // Create Uri for the feature service
-            Uri featureServiceUri = new Uri(
-                "http://sampleserver6.arcgisonline.com/arcgis/rest/services/DamageAssessment/FeatureServer/0");
-
-            // Initialize feature table using a url to feature server url
-            var featureTable = new ServiceFeatureTable(featureServiceUri);
-
-            // Initialize a new feature layer based on the feature table
-            _featureLayer = new FeatureLayer(featureTable);
-
-            // Set the selection color for feature layer
-            _featureLayer.SelectionColor = Colors.Cyan;
-
-            // Set the selection width
-            _featureLayer.SelectionWidth = 3;
-
-            // Make sure that used feature layer is loaded before we hook into the tapped event
-            // This prevents us trying to do selection on the layer that isn't initialized
-            await _featureLayer.LoadAsync();
-
-            // Check for the load status. If the layer is loaded then add it to map
-            if (_featureLayer.LoadStatus == LoadStatus.Loaded)
-            {
-                // Add the feature layer to the map
-                myMap.OperationalLayers.Add(_featureLayer);
-
-                // Add tap event handler for mapview
-                MyMapView.GeoViewTapped += OnMapViewTapped;
-            }
-        }
-
-        private async void OnMapViewTapped(object sender, GeoViewInputEventArgs e)
+        private async void OpenScene()
         {
             try
             {
-                // Define the selection tolerance (half the marker symbol size so that any click on the symbol will select the feature)
-                double tolerance = 14;
+                // Try to load the default portal, which will be ArcGIS Online.
+                ArcGISPortal portal = await ArcGISPortal.CreateAsync();
 
-                // Convert the tolerance to map units
-                double mapTolerance = tolerance * MyMapView.UnitsPerPixel;
+                // Create the portal item.
+                PortalItem websceneItem = await PortalItem.CreateAsync(portal, ItemId);
 
-                // Define the envelope around the tap location for selecting features
-                var selectionEnvelope = new Envelope(e.Location.X - mapTolerance, e.Location.Y - mapTolerance, e.Location.X + mapTolerance,
-                    e.Location.Y + mapTolerance, MyMapView.Map.SpatialReference);
-
-                // Define the query parameters for selecting features
-                var queryParams = new QueryParameters();
-
-                // Set the geometry to selection envelope for selection by geometry
-                queryParams.Geometry = selectionEnvelope;
-
-                // Select the features based on query parameters defined above
-                 _queryResult = await _featureLayer.SelectFeaturesAsync(queryParams, Esri.ArcGISRuntime.Mapping.SelectionMode.New);
-                bool hasResult = false;
-                foreach(var r in _queryResult)
-                {
-                    hasResult = true;
-                    Feature f = r as Feature;
-                    string attribute = "";
-                    foreach(var a in f.Attributes)
-                    {
-                        attribute = attribute + a.ToString() + "\n";
-                    }
-
-                    MapPoint p = f.Geometry as MapPoint;
-
-                    Point sp = MyMapView.LocationToScreen(p);
-                    TextBlock popupText = new TextBlock();
-                    popupText.Background = Brushes.LightBlue;
-                    popupText.Foreground = Brushes.Blue;
-                    popupText.Text = attribute;
-                    myPopup.Child = popupText;
-                    myPopup.Width = 200;
-                    myPopup.Height = 100;
-                    var b = MyMapView.Margin;
-                    
-                    myPopup.Margin = new Thickness(sp.X, sp.Y, MyMapView.ActualWidth - 200 - sp.X, MyMapView.ActualHeight - 100 - sp.Y);
-                }
-
-                if(!hasResult)
-                {
-                    myPopup.Width = myPopup.Height = 0;
-                }
-
+                // Create and show the scene.
+                MySceneView.Scene = new Scene(websceneItem);
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                MessageBox.Show("Sample error", ex.ToString());
+                MessageBox.Show(e.ToString(), "Error");
             }
         }
+
+        private async void Initialize()
+        {
+            OpenScene();
+        }
+        
+
+        
     }
 }
